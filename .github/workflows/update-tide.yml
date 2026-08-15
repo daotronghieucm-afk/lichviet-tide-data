@@ -1,0 +1,26 @@
+name: Cap nhat thuy trieu
+on:
+  schedule:
+    - cron: '0 17 * * *'      # 00:00 gio Viet Nam moi ngay
+  workflow_dispatch:           # cho phep bam chay tay
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - run: python fetch_tide.py
+        env:
+          TIDE_API_KEY: ${{ secrets.TIDE_API_KEY }}
+      - name: Luu ket qua
+        run: |
+          git config user.name "tide-bot"
+          git config user.email "tide-bot@users.noreply.github.com"
+          git add tide.json
+          git diff --staged --quiet || git commit -m "Cap nhat thuy trieu"
+          git push
